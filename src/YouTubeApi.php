@@ -19,7 +19,7 @@ class YouTubeApi
         return $client;
     }
 
-    public function getNumberOfShowroomVideos($requiredNumber = 0)
+    public function getNumberOfShowroomVideos($requiredNumber = 50)
     {
         $loopCountFrom = 1;
         $loopMaxCount = $requiredNumber / MAX_RESULTS;
@@ -30,6 +30,7 @@ class YouTubeApi
             $params = [
                 "q" => "SHOWROOM",
                 "order" => "date",
+                "type" => "video",
                 "pageToken" => "",
                 "maxResults" => MAX_RESULTS,
             ];
@@ -41,6 +42,34 @@ class YouTubeApi
                 $secondResponse = $this->youTubeApi->search->listSearch($part, $params);
                 $results = array_merge($results, $secondResponse["items"]);
             }
+        }
+        return $results;
+    }
+
+    public function getNumberOfApexLegendsVideos($requiredNumber = 10)
+    {
+        $loopCountFrom = 1;
+        $loopMaxCount = $requiredNumber / MAX_RESULTS;
+//         $publishedAfter = date('Y-m-d H:i:s', strtotime('-3 day', time()));
+//         var_dump($publishedAfter);
+
+        $i = 0;
+        $results = array();
+        while ($i <= 10) {
+            $part = ["snippet"];
+            $params = [
+                "q" => "Apex Legends",
+                "order" => "viewCount",
+                "type" => "video",
+//                 "publishedAfter" => $publishedAfter,
+                "pageToken" => "",
+                "maxResults" => MAX_RESULTS,
+            ];
+            $response = $this->youTubeApi->search->listSearch($part, $params);
+            foreach ($response as $index => $value) {
+                var_dump($value);
+            }
+            $i++;
         }
         return $results;
     }

@@ -1,3 +1,3 @@
 <?php
-    define("API_KEY", "AIzaSyAB48XdgfOINFlxMlvmsZl36zwonuca5Us");
+    define("API_KEY", "AIzaSyAQFCK_G64mmEbYS18rzHmC8zaBIs-dq_0");
     define("MAX_RESULTS", 50);
