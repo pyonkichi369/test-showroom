@@ -8,6 +8,7 @@ class YouTubeApi
     public $youTubeApi;
 
     public function __construct() {
+        date_default_timezone_set('Asia/Tokyo');
         $this->youTubeApi = new Google_Service_YouTube($this->getClient());
     }
 
@@ -48,29 +49,41 @@ class YouTubeApi
 
     public function getNumberOfApexLegendsVideos($requiredNumber = 10)
     {
-        $loopCountFrom = 1;
-        $loopMaxCount = $requiredNumber / MAX_RESULTS;
-//         $publishedAfter = date('Y-m-d H:i:s', strtotime('-3 day', time()));
-//         var_dump($publishedAfter);
+        $part = ["snippet"];
+        $params = [
+            "q" => "Apex Legends",
+            "order" => "viewCount",
+            "type" => "video",
+            "publishedAfter" => date('Y-m-d\TH:i:sP', strtotime('-3 day', time())),
+            "pageToken" => "",
+            "maxResults" => MAX_RESULTS,
+        ];
 
-        $i = 0;
+        $i = 1;
         $results = array();
-        while ($i <= 10) {
-            $part = ["snippet"];
-            $params = [
-                "q" => "Apex Legends",
-                "order" => "viewCount",
-                "type" => "video",
-//                 "publishedAfter" => $publishedAfter,
-                "pageToken" => "",
-                "maxResults" => MAX_RESULTS,
-            ];
+        while ($i <= $requiredNumber) {
             $response = $this->youTubeApi->search->listSearch($part, $params);
-            foreach ($response as $index => $value) {
-                var_dump($value);
+            foreach ($response["items"] as $index => $item) {
+                $params["pageToken"] = $response->nextPageToken;
+                $defaultAudioLanguage = $this->getDefaultAudioLanguage($item["id"]["videoId"]);
+                if ($this->isJapaneseVideo($defaultAudioLanguage) && $i <= 10) {
+                    array_push($results, $item["id"]["videoId"]);
+                    $i++;
+                }
+                continue;
             }
-            $i++;
         }
         return $results;
+    }
+
+    private function getDefaultAudioLanguage($videoId) {
+        $part = ["snippet", "localizations"];
+        $params = ["id" => $videoId];
+        $response = $this->youTubeApi->videos->listVideos($part, $params);
+        return $response["items"][0]["snippet"]["defaultAudioLanguage"];
+    }
+
+    private function isJapaneseVideo($defaultAudioLanguage) {
+        return $defaultAudioLanguage === "ja";
     }
 }
