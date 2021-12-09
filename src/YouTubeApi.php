@@ -22,26 +22,23 @@ class YouTubeApi
 
     public function getNumberOfShowroomVideos($requiredNumber = 50)
     {
-        $loopCountFrom = 1;
-        $loopMaxCount = $requiredNumber / MAX_RESULTS;
+        $part = ["snippet"];
+        $params = [
+            "q" => "SHOWROOM",
+            "order" => "date",
+            "type" => "video",
+            "pageToken" => "",
+            "maxResults" => MAX_RESULTS,
+        ];
 
+        $i = 1;
         $results = array();
-        for ($i = $loopCountFrom; $i <= $loopMaxCount; $i++) {
-            $part = ["snippet"];
-            $params = [
-                "q" => "SHOWROOM",
-                "order" => "date",
-                "type" => "video",
-                "pageToken" => "",
-                "maxResults" => MAX_RESULTS,
-            ];
-            $firstResponse = $this->youTubeApi->search->listSearch($part, $params);
-            if ($i != $loopCountFrom) {
-                $results = array_merge($results, $firstResponse["items"]);
-            } elseif (isset($firstResponse->nextPageToken)) {
-                $params["pageToken"] = $firstResponse->nextPageToken;
-                $secondResponse = $this->youTubeApi->search->listSearch($part, $params);
-                $results = array_merge($results, $secondResponse["items"]);
+        while ($i <= $requiredNumber) {
+            $response = $this->youTubeApi->search->listSearch($part, $params);
+            foreach ($response["items"] as $index => $item) {
+                $params["pageToken"] = $response->nextPageToken;
+                array_push($results, $item["id"]["videoId"]);
+                $i++;
             }
         }
         return $results;
@@ -64,14 +61,16 @@ class YouTubeApi
         while ($i <= $requiredNumber) {
             $response = $this->youTubeApi->search->listSearch($part, $params);
             foreach ($response["items"] as $index => $item) {
-                $params["pageToken"] = $response->nextPageToken;
+                if ($i == 10) {
+                    break;
+                }
                 $defaultAudioLanguage = $this->getDefaultAudioLanguage($item["id"]["videoId"]);
-                if ($this->isJapaneseVideo($defaultAudioLanguage) && $i <= 10) {
+                if ($this->isJapaneseVideo($defaultAudioLanguage)) {
                     array_push($results, $item["id"]["videoId"]);
                     $i++;
                 }
-                continue;
             }
+            $params["pageToken"] = $response->nextPageToken;
         }
         return $results;
     }

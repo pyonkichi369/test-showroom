@@ -6,5 +6,6 @@ $youTubeApi = new YouTubeApi();
 $results = $youTubeApi->getNumberOfApexLegendsVideos(10);
 
 foreach ($results as $index => $result) {
-    echo "https://www.youtube.com/watch?v=" . $result . PHP_EOL;
+    $number = $index + 1;
+    echo $number . " https://www.youtube.com/watch?v=" . $result . PHP_EOL;
 }

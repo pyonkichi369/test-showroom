@@ -6,5 +6,6 @@ $youTubeApi = new YouTubeApi();
 $results = $youTubeApi->getNumberOfShowroomVideos(100);
 
 foreach ($results as $index => $result) {
-    echo "https://www.youtube.com/watch?v=" . $result["id"]["videoId"] . PHP_EOL;
+    $number = $index + 1;
+    echo $number . " https://www.youtube.com/watch?v=" . $result . PHP_EOL;
 }
