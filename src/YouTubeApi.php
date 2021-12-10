@@ -60,17 +60,14 @@ class YouTubeApi
         $results = array();
         while ($i <= $requiredNumber) {
             $response = $this->youTubeApi->search->listSearch($part, $params);
+            $params["pageToken"] = $response->nextPageToken;
             foreach ($response["items"] as $index => $item) {
-                if ($i == 10) {
-                    break;
-                }
                 $defaultAudioLanguage = $this->getDefaultAudioLanguage($item["id"]["videoId"]);
-                if ($this->isJapaneseVideo($defaultAudioLanguage)) {
+                if ($this->isJapaneseVideo($defaultAudioLanguage) && $i <= 10) {
                     array_push($results, $item["id"]["videoId"]);
                     $i++;
                 }
             }
-            $params["pageToken"] = $response->nextPageToken;
         }
         return $results;
     }
